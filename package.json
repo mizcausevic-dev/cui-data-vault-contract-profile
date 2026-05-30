@@ -1,0 +1,17 @@
+{
+  "name": "cui-data-vault-contract-profile",
+  "version": "0.1.0",
+  "description": "DefenseTech Decision Card vault contract: 3-axis typed policy contract for CUI / classified / ITAR / EAR / foreign-person data handling in DIB AI tools. First Suite vault contract with three orthogonal typed policy slots cross-bound to all 3 sibling DefenseTech operator+evidence+incident specs.",
+  "type": "module",
+  "main": "src/index.mjs",
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "validate": "node src/validate.mjs",
+    "build:examples": "node src/build-examples.mjs"
+  },
+  "dependencies": { "ajv": "^8.17.1", "ajv-formats": "^3.0.1" },
+  "license": "MIT",
+  "homepage": "https://github.com/mizcausevic-dev/cui-data-vault-contract-profile",
+  "repository": { "type": "git", "url": "git+https://github.com/mizcausevic-dev/cui-data-vault-contract-profile.git" },
+  "keywords": ["defensetech", "vault-contract", "decision-card", "cui", "itar", "ear", "classified", "foreign-person", "kinetic-gain-protocol-suite"]
+}

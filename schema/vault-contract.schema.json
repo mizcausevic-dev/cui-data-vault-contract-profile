@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.kineticgain.com/cui-data-vault-contract-profile/v0.1",
+  "title": "CUI Data Vault Contract — DefenseTech Decision Card Profile",
+  "type": "object",
+  "required": ["contract_id", "schema_version", "decision_card_url", "ai_system", "data_vault_targets", "axis_policies", "cross_binding_refs"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_id": { "type": "string", "minLength": 1 },
+    "schema_version": { "const": "0.1" },
+    "decision_card_url": { "type": "string", "format": "uri" },
+    "issued_at": { "type": "string", "format": "date-time" },
+    "expires_at": { "type": "string", "format": "date-time" },
+
+    "ai_system": {
+      "type": "object",
+      "required": ["name", "version", "ai_tool_card_url"],
+      "properties": {
+        "name": { "type": "string" },
+        "version": { "type": "string" },
+        "ai_tool_card_url": { "type": "string", "format": "uri" }
+      }
+    },
+
+    "data_vault_targets": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["target_id", "vault_provider", "vault_tier", "fields_tokenized_or_held"],
+        "properties": {
+          "target_id": { "type": "string" },
+          "vault_provider": { "enum": ["skyflow", "aws-govcloud", "azure-government", "private-on-prem-fips-140-validated", "other"] },
+          "vault_tier": { "enum": ["tokenization-only", "encryption-at-rest-keyed", "format-preserving-encryption", "polymorphic-encryption", "structured-encryption"] },
+          "fields_tokenized_or_held": { "type": "array", "items": { "type": "string" } },
+          "fips_140_validated": { "type": "boolean" },
+          "fedramp_authorized": { "type": "boolean" }
+        }
+      }
+    },
+
+    "axis_policies": {
+      "type": "object",
+      "required": ["cui_handling_policy", "export_control_handling_policy", "foreign_person_handling_policy"],
+      "properties": {
+        "cui_handling_policy": {
+          "type": "object",
+          "description": "Per-CUI-tier handling rules. Each key is a CUI categorization; value declares the policy.",
+          "required": ["PUBLIC", "CUI-BASIC", "CUI-SPECIFIED", "CUI-SPECIFIED-NOFORN"],
+          "properties": {
+            "PUBLIC": { "$ref": "#/$defs/perTierPolicy" },
+            "CUI-BASIC": { "$ref": "#/$defs/perTierPolicy" },
+            "CUI-SPECIFIED": { "$ref": "#/$defs/perTierPolicy" },
+            "CUI-SPECIFIED-NOFORN": { "$ref": "#/$defs/perTierPolicy" },
+            "CONTROLLED-NOFORN": { "$ref": "#/$defs/perTierPolicy" },
+            "CLASSIFIED-CONFIDENTIAL": { "$ref": "#/$defs/perTierPolicy" },
+            "CLASSIFIED-SECRET": { "$ref": "#/$defs/perTierPolicy" },
+            "CLASSIFIED-TOP-SECRET": { "$ref": "#/$defs/perTierPolicy" },
+            "SCI": { "$ref": "#/$defs/perTierPolicy" }
+          }
+        },
+        "export_control_handling_policy": {
+          "type": "object",
+          "required": ["NOT-EXPORT-CONTROLLED", "EAR-99", "EAR-CCL-RESTRICTED", "ITAR"],
+          "properties": {
+            "NOT-EXPORT-CONTROLLED": { "$ref": "#/$defs/perTierPolicy" },
+            "EAR-99": { "$ref": "#/$defs/perTierPolicy" },
+            "EAR-CCL-RESTRICTED": { "$ref": "#/$defs/perTierPolicy" },
+            "ITAR": { "$ref": "#/$defs/perTierPolicy" }
+          }
+        },
+        "foreign_person_handling_policy": {
+          "type": "object",
+          "required": ["US-PERSON-ONLY", "AUTHORIZED-FOREIGN-PERSON-WITH-LICENSE", "FIVE-EYES-ONLY", "NATO-PLUS-ONLY", "NO-RESTRICTION"],
+          "properties": {
+            "US-PERSON-ONLY": { "$ref": "#/$defs/perTierPolicy" },
+            "AUTHORIZED-FOREIGN-PERSON-WITH-LICENSE": { "$ref": "#/$defs/perTierPolicy" },
+            "FIVE-EYES-ONLY": { "$ref": "#/$defs/perTierPolicy" },
+            "NATO-PLUS-ONLY": { "$ref": "#/$defs/perTierPolicy" },
+            "NO-RESTRICTION": { "$ref": "#/$defs/perTierPolicy" }
+          }
+        }
+      }
+    },
+
+    "retention_envelope": {
+      "type": "object",
+      "properties": {
+        "default_retention_days": { "type": "integer", "minimum": 0 },
+        "legal_hold_supported": { "type": "boolean" },
+        "destruction_method": { "enum": ["nist-sp-800-88-clear", "nist-sp-800-88-purge", "nist-sp-800-88-destroy"] }
+      }
+    },
+
+    "cross_binding_refs": {
+      "type": "object",
+      "required": ["defense_decision_record_audit_stream_repo", "cmmc_l2_l3_readiness_evidence_bundle_repo", "defense_ai_incident_card_profile_repo"],
+      "properties": {
+        "defense_decision_record_audit_stream_repo": { "type": "string", "format": "uri" },
+        "cmmc_l2_l3_readiness_evidence_bundle_repo": { "type": "string", "format": "uri" },
+        "defense_ai_incident_card_profile_repo": { "type": "string", "format": "uri" }
+      }
+    }
+  },
+  "$defs": {
+    "perTierPolicy": {
+      "type": "object",
+      "required": ["allowed_actions", "minimum_human_user_status", "requires_distribution_statement", "requires_fso_cosign", "requires_audit_stream_event"],
+      "properties": {
+        "allowed_actions": {
+          "type": "array",
+          "items": { "enum": ["read", "search", "generate", "stamp", "summarize", "redact", "no-action-allowed"] }
+        },
+        "minimum_human_user_status": { "enum": ["any", "us-person-verified", "authorized-foreign-person-with-license", "secret-clearance", "top-secret-clearance", "ts-sci-clearance"] },
+        "requires_distribution_statement": { "type": "boolean" },
+        "requires_fso_cosign": { "type": "boolean" },
+        "requires_audit_stream_event": { "type": "boolean" },
+        "vault_target_id_required": { "type": "string" },
+        "notes": { "type": "string" }
+      }
+    }
+  }
+}

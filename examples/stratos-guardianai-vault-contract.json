@@ -1,0 +1,284 @@
+{
+  "contract_id": "STRATOS-VAULT-GUARDIANAI-2026Q4",
+  "schema_version": "0.1",
+  "decision_card_url": "https://stratos-aerospace.example/.well-known/decisions/STRATOS-DEC-2026-DEF-0084.json",
+  "issued_at": "2026-10-01T00:00:00Z",
+  "expires_at": "2027-09-30T23:59:59Z",
+  "ai_system": {
+    "name": "VendorD GuardianAI",
+    "version": "3.x",
+    "ai_tool_card_url": "https://vendord-guardianai.example/.well-known/ai-tool-cards/guardianai-3.x.json"
+  },
+  "data_vault_targets": [
+    {
+      "target_id": "vault-azgov-cui",
+      "vault_provider": "azure-government",
+      "vault_tier": "encryption-at-rest-keyed",
+      "fields_tokenized_or_held": [
+        "rfp_solicitation_number",
+        "cage_code",
+        "personnel_clearance_id"
+      ],
+      "fips_140_validated": true,
+      "fedramp_authorized": true
+    },
+    {
+      "target_id": "vault-skyflow-tdp",
+      "vault_provider": "skyflow",
+      "vault_tier": "tokenization-only",
+      "fields_tokenized_or_held": [
+        "technical_data_package_id",
+        "weapon_system_program_id"
+      ],
+      "fips_140_validated": true,
+      "fedramp_authorized": false
+    },
+    {
+      "target_id": "vault-prem-classified",
+      "vault_provider": "private-on-prem-fips-140-validated",
+      "vault_tier": "structured-encryption",
+      "fields_tokenized_or_held": [
+        "classified_inference_payload",
+        "fso_cosign_token"
+      ],
+      "fips_140_validated": true,
+      "fedramp_authorized": false
+    }
+  ],
+  "axis_policies": {
+    "cui_handling_policy": {
+      "PUBLIC": {
+        "allowed_actions": [
+          "read",
+          "search",
+          "generate",
+          "summarize",
+          "redact"
+        ],
+        "minimum_human_user_status": "any",
+        "requires_distribution_statement": false,
+        "requires_fso_cosign": false,
+        "requires_audit_stream_event": false
+      },
+      "CUI-BASIC": {
+        "allowed_actions": [
+          "read",
+          "search",
+          "generate",
+          "summarize",
+          "redact"
+        ],
+        "minimum_human_user_status": "us-person-verified",
+        "requires_distribution_statement": false,
+        "requires_fso_cosign": false,
+        "requires_audit_stream_event": true
+      },
+      "CUI-SPECIFIED": {
+        "allowed_actions": [
+          "read",
+          "search",
+          "generate",
+          "summarize"
+        ],
+        "minimum_human_user_status": "us-person-verified",
+        "requires_distribution_statement": true,
+        "requires_fso_cosign": false,
+        "requires_audit_stream_event": true,
+        "vault_target_id_required": "vault-azgov-cui"
+      },
+      "CUI-SPECIFIED-NOFORN": {
+        "allowed_actions": [
+          "read",
+          "search",
+          "summarize"
+        ],
+        "minimum_human_user_status": "us-person-verified",
+        "requires_distribution_statement": true,
+        "requires_fso_cosign": false,
+        "requires_audit_stream_event": true,
+        "vault_target_id_required": "vault-azgov-cui",
+        "notes": "NoForn implies generate output requires manual review before disclosure"
+      },
+      "CONTROLLED-NOFORN": {
+        "allowed_actions": [
+          "read",
+          "summarize"
+        ],
+        "minimum_human_user_status": "us-person-verified",
+        "requires_distribution_statement": true,
+        "requires_fso_cosign": true,
+        "requires_audit_stream_event": true,
+        "vault_target_id_required": "vault-azgov-cui"
+      },
+      "CLASSIFIED-CONFIDENTIAL": {
+        "allowed_actions": [
+          "read",
+          "summarize"
+        ],
+        "minimum_human_user_status": "secret-clearance",
+        "requires_distribution_statement": true,
+        "requires_fso_cosign": true,
+        "requires_audit_stream_event": true,
+        "vault_target_id_required": "vault-prem-classified"
+      },
+      "CLASSIFIED-SECRET": {
+        "allowed_actions": [
+          "read",
+          "summarize"
+        ],
+        "minimum_human_user_status": "secret-clearance",
+        "requires_distribution_statement": true,
+        "requires_fso_cosign": true,
+        "requires_audit_stream_event": true,
+        "vault_target_id_required": "vault-prem-classified"
+      },
+      "CLASSIFIED-TOP-SECRET": {
+        "allowed_actions": [
+          "read"
+        ],
+        "minimum_human_user_status": "top-secret-clearance",
+        "requires_distribution_statement": true,
+        "requires_fso_cosign": true,
+        "requires_audit_stream_event": true,
+        "vault_target_id_required": "vault-prem-classified"
+      },
+      "SCI": {
+        "allowed_actions": [
+          "no-action-allowed"
+        ],
+        "minimum_human_user_status": "ts-sci-clearance",
+        "requires_distribution_statement": true,
+        "requires_fso_cosign": true,
+        "requires_audit_stream_event": true,
+        "vault_target_id_required": "vault-prem-classified",
+        "notes": "GuardianAI v3.x not authorized for SCI inference; all actions blocked at vault layer"
+      }
+    },
+    "export_control_handling_policy": {
+      "NOT-EXPORT-CONTROLLED": {
+        "allowed_actions": [
+          "read",
+          "search",
+          "generate",
+          "summarize",
+          "redact"
+        ],
+        "minimum_human_user_status": "any",
+        "requires_distribution_statement": false,
+        "requires_fso_cosign": false,
+        "requires_audit_stream_event": false
+      },
+      "EAR-99": {
+        "allowed_actions": [
+          "read",
+          "search",
+          "generate",
+          "summarize",
+          "redact"
+        ],
+        "minimum_human_user_status": "any",
+        "requires_distribution_statement": false,
+        "requires_fso_cosign": false,
+        "requires_audit_stream_event": false
+      },
+      "EAR-CCL-RESTRICTED": {
+        "allowed_actions": [
+          "read",
+          "search",
+          "generate",
+          "summarize"
+        ],
+        "minimum_human_user_status": "us-person-verified",
+        "requires_distribution_statement": false,
+        "requires_fso_cosign": false,
+        "requires_audit_stream_event": true
+      },
+      "ITAR": {
+        "allowed_actions": [
+          "read",
+          "search",
+          "summarize"
+        ],
+        "minimum_human_user_status": "us-person-verified",
+        "requires_distribution_statement": true,
+        "requires_fso_cosign": false,
+        "requires_audit_stream_event": true,
+        "notes": "ITAR generate restricted; deemed-export-eligible foreign-person access requires AUTHORIZED-FOREIGN-PERSON tier"
+      }
+    },
+    "foreign_person_handling_policy": {
+      "US-PERSON-ONLY": {
+        "allowed_actions": [
+          "read",
+          "search",
+          "generate",
+          "summarize",
+          "redact"
+        ],
+        "minimum_human_user_status": "us-person-verified",
+        "requires_distribution_statement": false,
+        "requires_fso_cosign": false,
+        "requires_audit_stream_event": true
+      },
+      "AUTHORIZED-FOREIGN-PERSON-WITH-LICENSE": {
+        "allowed_actions": [
+          "read",
+          "search",
+          "summarize"
+        ],
+        "minimum_human_user_status": "authorized-foreign-person-with-license",
+        "requires_distribution_statement": true,
+        "requires_fso_cosign": false,
+        "requires_audit_stream_event": true,
+        "notes": "DDTC license number required + per-event audit; review weekly"
+      },
+      "FIVE-EYES-ONLY": {
+        "allowed_actions": [
+          "read",
+          "search",
+          "generate",
+          "summarize"
+        ],
+        "minimum_human_user_status": "us-person-verified",
+        "requires_distribution_statement": false,
+        "requires_fso_cosign": false,
+        "requires_audit_stream_event": true,
+        "notes": "AUS/CAN/GBR/NZL/USA cleared persons"
+      },
+      "NATO-PLUS-ONLY": {
+        "allowed_actions": [
+          "read",
+          "search",
+          "summarize"
+        ],
+        "minimum_human_user_status": "us-person-verified",
+        "requires_distribution_statement": false,
+        "requires_fso_cosign": false,
+        "requires_audit_stream_event": true
+      },
+      "NO-RESTRICTION": {
+        "allowed_actions": [
+          "read",
+          "search",
+          "generate",
+          "summarize",
+          "redact"
+        ],
+        "minimum_human_user_status": "any",
+        "requires_distribution_statement": false,
+        "requires_fso_cosign": false,
+        "requires_audit_stream_event": false
+      }
+    }
+  },
+  "retention_envelope": {
+    "default_retention_days": 2555,
+    "legal_hold_supported": true,
+    "destruction_method": "nist-sp-800-88-purge"
+  },
+  "cross_binding_refs": {
+    "defense_decision_record_audit_stream_repo": "https://github.com/mizcausevic-dev/defense-decision-record-audit-stream",
+    "cmmc_l2_l3_readiness_evidence_bundle_repo": "https://github.com/mizcausevic-dev/cmmc-l2-l3-readiness-evidence-bundle",
+    "defense_ai_incident_card_profile_repo": "https://github.com/mizcausevic-dev/defense-ai-incident-card-profile"
+  }
+}
